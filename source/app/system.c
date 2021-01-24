@@ -21,7 +21,7 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 02.Jan.2021  |
+ |  Author: Mihai Baneu                           Last modified: 24.Jan.2021  |
  |                                                                            |
  |___________________________________________________________________________*/
 
@@ -90,6 +90,14 @@ void system_init()
 
     /* enable APB2 devices */
     SET_BIT(RCC->APB2ENR, RCC_APB2ENR_ADC1EN);
+    SET_BIT(RCC->APB2ENR, RCC_APB2ENR_TIM10EN);
+
+    /* one us timer for delay */
+    TIM10->PSC = (configCPU_CLOCK_HZ / 1000000) - 1;
+    MODIFY_REG(TIM10->CR1, TIM_CR1_CEN_Msk, TIM_CR1_CEN);
+
+    /* stop timer when debuggng */
+    SET_BIT(DBGMCU->APB2FZ, DBGMCU_APB2_FZ_DBG_TIM10_STOP);
 
     /* enable DWT */
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -101,9 +109,9 @@ void system_init()
  */
 void delay_us(const uint32_t us)
 {
-    DWT->CYCCNT = 0;
+    SET_BIT(TIM10->EGR, TIM_EGR_UG);
     do {
-    } while (DWT->CYCCNT < (us * (configCPU_CLOCK_HZ / 1000000)));
+    } while (TIM10->CNT < us );
 }
 
 /**
@@ -116,12 +124,17 @@ void blink(const uint8_t n)
     for (;;) {
         for (int i = 0; i < n; i++) {
             gpio_set_blue_led();
-            delay_us(500000);
+            DWT->CYCCNT = 0;
+            do {
+            } while (DWT->CYCCNT < (100 * (configCPU_CLOCK_HZ / 1000)));
 
             gpio_reset_blue_led();
-            delay_us(500000);
+            DWT->CYCCNT = 0;
+            do {
+            } while (DWT->CYCCNT < (400 * (configCPU_CLOCK_HZ / 1000)));
         }
-        delay_us(2000000);
+        do {
+        } while (DWT->CYCCNT < (2000 * (configCPU_CLOCK_HZ / 1000)));
     }
 }
 

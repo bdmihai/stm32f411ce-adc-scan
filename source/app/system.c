@@ -98,10 +98,6 @@ void system_init()
 
     /* stop timer when debuggng */
     SET_BIT(DBGMCU->APB2FZ, DBGMCU_APB2_FZ_DBG_TIM10_STOP);
-
-    /* enable DWT */
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
 /**
@@ -121,6 +117,10 @@ void delay_us(const uint32_t us)
 */
 void blink(const uint8_t n)
 {
+    /* enable DWT */
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
     for (;;) {
         for (int i = 0; i < n; i++) {
             gpio_set_blue_led();

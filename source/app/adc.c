@@ -37,9 +37,8 @@ uint16_t adc_buffer_index = 0;
 void adc_init()
 {
     /* set the pis B0 as input ADC */
-    /* configure LED pin */
     MODIFY_REG(GPIOB->MODER, GPIO_MODER_MODER0_Msk, 11);      /* set the pin as analog */
-    MODIFY_REG(GPIOB->PUPDR, GPIO_PUPDR_PUPD0_Msk,  0);      /* no pull up, no pull down */
+    MODIFY_REG(GPIOB->PUPDR, GPIO_PUPDR_PUPD0_Msk,  0);       /* no pull up, no pull down */
 
     /* ADC prescalar 8 */
     MODIFY_REG(ADC1_COMMON->CCR, ADC_CCR_ADCPRE_Msk, ADC_CCR_ADCPRE_0 | ADC_CCR_ADCPRE_1);
